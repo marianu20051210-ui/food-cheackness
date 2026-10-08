@@ -1,0 +1,82 @@
+{
+  "Apple": {
+    "category": "Fruit",
+    "typical_shelf_life_days": 25
+  },
+  "Banana": {
+    "category": "Fruit",
+    "typical_shelf_life_days": 7
+  },
+  "Bread": {
+    "category": "Bakery",
+    "typical_shelf_life_days": 5
+  },
+  "Carrot": {
+    "category": "Vegetable",
+    "typical_shelf_life_days": 20
+  },
+  "Cheese": {
+    "category": "Dairy",
+    "typical_shelf_life_days": 15
+  },
+  "Chicken": {
+    "category": "Meat",
+    "typical_shelf_life_days": 3
+  },
+  "Curd": {
+    "category": "Dairy",
+    "typical_shelf_life_days": 5
+  },
+  "Egg": {
+    "category": "Dairy",
+    "typical_shelf_life_days": 21
+  },
+  "Fish": {
+    "category": "Meat",
+    "typical_shelf_life_days": 2
+  },
+  "Grapes": {
+    "category": "Fruit",
+    "typical_shelf_life_days": 9
+  },
+  "Lettuce": {
+    "category": "Vegetable",
+    "typical_shelf_life_days": 6
+  },
+  "Mango": {
+    "category": "Fruit",
+    "typical_shelf_life_days": 8
+  },
+  "Milk": {
+    "category": "Dairy",
+    "typical_shelf_life_days": 6
+  },
+  "Onion": {
+    "category": "Vegetable",
+    "typical_shelf_life_days": 35
+  },
+  "Paneer": {
+    "category": "Dairy",
+    "typical_shelf_life_days": 4
+  },
+  "Potato": {
+    "category": "Vegetable",
+    "typical_shelf_life_days": 30
+  },
+  "Rice (cooked)": {
+    "category": "Cooked Food",
+    "typical_shelf_life_days": 2
+  },
+  "Spinach": {
+    "category": "Vegetable",
+    "typical_shelf_life_days": 5
+  },
+  "Tomato": {
+    "category": "Vegetable",
+    "typical_shelf_life_days": 10
+  },
+  "Yogurt": {
+    "category": "Dairy",
+    "typical_shelf_life_days": 7
+  }
+}

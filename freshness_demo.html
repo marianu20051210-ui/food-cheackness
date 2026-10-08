@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FreshCheck · Smart Food Management</title>
+<style>
+:root{
+  --bg:#091512; --ink:#ecfdf5; --muted:#7ea293;
+  --surface:rgba(18,38,32,0.82); --solid:#112620; --line:rgba(52,211,153,0.22);
+  --brand:#10b981; --brand2:#059669; --brand-soft:rgba(16,185,129,0.18);
+  --good:#10b981; --warn:#f59e0b; --bad:#f43f5e;
+  --good-soft:rgba(16,185,129,0.22); --warn-soft:rgba(245,158,11,0.22); --bad-soft:rgba(244,63,94,0.22);
+  --shadow:0 20px 40px -12px rgba(0,0,0,0.65), 0 0 24px rgba(16,185,129,0.14);
+  --glow1:rgba(16,185,129,0.30); --glow2:rgba(6,182,212,0.22);
+  --radius:24px;
+  box-sizing:border-box;
+}
+:root[data-theme="light"]{
+  --bg:#f0fdf9; --ink:#062d22; --muted:#4a7364;
+  --surface:rgba(255,255,255,0.92); --solid:#ffffff; --line:rgba(16,185,129,0.22);
+  --brand:#059669; --brand2:#047857; --brand-soft:rgba(5,150,105,0.14);
+  --good:#059669; --warn:#d97706; --bad:#e11d48;
+  --good-soft:rgba(5,150,105,0.18); --warn-soft:rgba(217,119,6,0.18); --bad-soft:rgba(225,29,72,0.18);
+  --shadow:0 18px 36px -10px rgba(5,150,105,0.18), 0 8px 16px rgba(0,0,0,0.04);
+  --glow1:rgba(52,211,153,0.32); --glow2:rgba(14,165,233,0.20);
+}
+*{box-sizing:border-box;}
+[hidden]{display:none !important;}
+html{background:var(--bg); font-size:17px; scroll-padding-top:16px;}
+body{
+  margin:0; color:var(--ink); min-height:100vh; line-height:1.5;
+  font-family:system-ui,-apple-system,"Segoe UI","Noto Sans Tamil",Arial,sans-serif;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 48px);
+  transition:background .35s, color .35s;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(750px 450px at 85% -8%, var(--glow1), transparent 65%),
+    radial-gradient(650px 420px at -10% 30%, var(--glow2), transparent 60%);
+}
+.wrap{max-width:1080px; margin:0 auto;}
+
+.navbar{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  background:var(--surface); border:1.5px solid var(--line); border-radius:24px;
+  padding:10px 18px; margin-bottom:24px; box-shadow:var(--shadow);
+  backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+}
+.brand{display:flex; align-items:center; gap:11px; cursor:pointer;}
+.logo{
+  width:44px; height:44px; border-radius:15px; display:grid; place-items:center; font-size:23px;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  box-shadow:0 8px 22px var(--brand-soft), inset 0 2px 3px rgba(255,255,255,0.35);
+  transform:rotate(-3deg);
+}
+.bname{font-weight:900; letter-spacing:-.015em; font-size:1.2rem; line-height:1;}
+
+.nav-links{
+  display:flex; gap:8px; align-items:center;
+  background:rgba(0,0,0,0.18); padding:5px 8px; border-radius:999px;
+  border:1px solid var(--line);
+}
+:root[data-theme="light"] .nav-links{background:rgba(5,150,105,0.06);}
+
+.nav-item{
+  background:transparent; border:1px solid transparent; color:var(--muted); font:inherit; font-size:.88rem;
+  font-weight:800; padding:8px 18px; border-radius:999px; cursor:pointer; transition:all .25s cubic-bezier(.34,1.4,.64,1);
+  letter-spacing:.01em;
+}
+.nav-item:hover{
+  color:var(--ink); background:var(--brand-soft); border-color:var(--line);
+  transform:translateY(-2px);
+}
+.nav-item.active{
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  color:#ffffff;
+  border-color:rgba(255,255,255,0.25);
+  box-shadow:0 8px 18px var(--brand-soft), inset 0 1px 2px rgba(255,255,255,0.4);
+  transform:translateY(-2px) scale(1.02);
+}
+
+.top-right-controls{display:flex; align-items:center; gap:10px; position:relative;}
+
+.langseg{
+  display:flex; background:rgba(0,0,0,0.2); border:1px solid var(--line);
+  border-radius:999px; padding:3px;
+}
+:root[data-theme="light"] .langseg{background:rgba(5,150,105,0.08);}
+.langseg button{
+  border:0; background:transparent; font-size:.8rem; font-weight:800; padding:6px 12px;
+  border-radius:999px; cursor:pointer; color:var(--muted); transition:all .2s;
+}
+.langseg button[aria-pressed="true"]{
+  background:var(--brand); color:#fff; box-shadow:0 4px 10px var(--brand-soft);
+}
+
+.iconbtn{
+  width:42px; height:42px; border-radius:14px; border:1px solid var(--line); background:var(--solid);
+  color:var(--ink); font-size:1.1rem; cursor:pointer; transition:all .2s;
+  display:grid; place-items:center; box-shadow:0 4px 12px rgba(0,0,0,0.18);
+}
+.iconbtn:hover{transform:scale(1.06); border-color:var(--brand);}
+
+.profile-btn{
+  display:flex; align-items:center; gap:9px; background:var(--solid); border:1.5px solid var(--line);
+  padding:4px 12px 4px 4px; border-radius:999px; cursor:pointer; transition:all .25s;
+  box-shadow:0 4px 14px rgba(0,0,0,0.2);
+}
+.profile-btn:hover{
+  border-color:var(--brand); box-shadow:0 0 18px var(--brand-soft);
+  transform:translateY(-2px);
+}
+.profile-avatar{
+  width:34px; height:34px; border-radius:50%; object-fit:cover;
+  border:2px solid var(--brand); background:var(--brand-soft);
+  display:grid; place-items:center; font-size:18px;
+}
+.profile-tag{font-size:.86rem; font-weight:800; color:var(--ink); max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+.profile-menu{
+  position:absolute; top:calc(100% + 12px); right:0; width:265px;
+  background:var(--solid); border:1px solid var(--line); border-radius:22px;
+  padding:16px; box-shadow:0 20px 42px rgba(0,0,0,0.6); z-index:100;
+  backdrop-filter:blur(24px); animation:pop .2s ease-out;
+}
+.profile-menu-header{display:flex; align-items:center; gap:12px; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid var(--line);}
+.profile-menu-avatar{width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--brand);}
+.profile-menu-name{font-weight:900; font-size:1.05rem; line-height:1.2;}
+.profile-menu-house{font-size:.82rem; color:var(--brand); font-weight:800;}
+.profile-menu-email{font-size:.76rem; color:var(--muted); word-break:break-all;}
+.profile-menu-actions{display:flex; flex-direction:column; gap:8px;}
+
+.page-view{display:none;}
+.page-view.active{display:block;}
+
+.home-hero{text-align:center; padding:44px 16px 30px;}
+.home-hero h1{
+  font-size:clamp(2.2rem,6vw,3.2rem); margin:0 0 12px; font-weight:900;
+  background:linear-gradient(135deg,var(--ink) 25%,var(--brand) 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.home-features{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; margin-top:28px;}
+.feature-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:24px;
+  box-shadow:var(--shadow); transition:transform .2s, border-color .2s;
+}
+.feature-card:hover{transform:translateY(-4px); border-color:var(--brand);}
+.feature-card .fic{font-size:2.4rem; margin-bottom:10px;}
+.feature-card h3{margin:0 0 6px; font-weight:900;}
+.feature-card p{margin:0; color:var(--muted); font-size:.92rem;}
+
+.about-box{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:32px;
+  box-shadow:var(--shadow); max-width:760px; margin:20px auto;
+}
+
+.login-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:32px;
+  box-shadow:var(--shadow); max-width:400px; margin:30px auto;
+}
+
+.layout{display:block;}
+.col-out{margin-top:6px;}
+.empty{display:none;}
+@media (min-width:900px){
+  .layout{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:28px; align-items:start;}
+  .col-out{position:sticky; top:20px; margin-top:0;}
+  .empty{
+    display:block; border:2px dashed var(--line); border-radius:var(--radius); padding:52px 28px; text-align:center;
+    color:var(--muted); background:var(--surface); backdrop-filter:blur(16px);
+  }
+  .empty .big{font-size:3.8rem; margin-bottom:10px;}
+  .empty h3{margin:0 0 6px; color:var(--ink); font-size:1.2rem; font-weight:800;}
+  .empty p{margin:0;}
+}
+
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:22px;
+  box-shadow:var(--shadow); backdrop-filter:blur(20px); margin-bottom:18px;
+}
+.stephead{display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.05rem; margin:0 0 16px;}
+.num{
+  width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:.85rem; color:#fff;
+  background:linear-gradient(135deg,var(--brand),var(--brand2)); flex-shrink:0;
+  box-shadow:0 6px 14px var(--brand-soft);
+}
+.seg{
+  position:relative; display:grid; grid-template-columns:1fr 1fr; background:var(--brand-soft);
+  border-radius:18px; padding:5px; margin-bottom:18px;
+}
+.seg button{
+  position:relative; z-index:1; border:0; background:transparent; padding:12px 8px; font:inherit; font-weight:800;
+  color:var(--muted); border-radius:14px; cursor:pointer;
+}
+.seg button[aria-pressed="true"]{color:#fff;}
+.seg-ind{
+  position:absolute; top:5px; bottom:5px; left:5px; width:calc(50% - 5px); border-radius:14px;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  box-shadow:0 8px 20px var(--brand-soft); transition:transform .35s cubic-bezier(.34,1.4,.64,1);
+}
+.seg.photo .seg-ind{transform:translateX(100%);}
+
+.filters{display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; margin-bottom:12px; scrollbar-width:none;}
+.filters::-webkit-scrollbar{display:none;}
+.fchip{
+  flex-shrink:0; border:1px solid var(--line); background:var(--solid); color:var(--muted); font:inherit; font-size:.85rem;
+  font-weight:700; padding:8px 16px; border-radius:999px; cursor:pointer;
+}
+.fchip[aria-pressed="true"]{background:var(--brand); border-color:var(--brand); color:#fff; box-shadow:0 6px 16px var(--brand-soft);}
+
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:12px;}
+.food{
+  position:relative; background:var(--solid); border:1.5px solid var(--line); border-radius:18px;
+  padding:14px 4px 10px; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer;
+  font:inherit; color:var(--ink); transition:all .2s; box-shadow:0 8px 16px rgba(0,0,0,0.18);
+  animation:pop .35s both; animation-delay:calc(var(--i) * 14ms);
+}
+.food:hover{transform:translateY(-4px); border-color:var(--brand);}
+.food .e{font-size:2.1rem; line-height:1.1;}
+.food .n{font-size:.82rem; font-weight:800; text-align:center; line-height:1.2; word-break:break-word; padding:0 4px;}
+.food[aria-pressed="true"]{border-color:var(--brand); background:var(--brand-soft); box-shadow:0 10px 24px var(--brand-soft);}
+.del-item-btn{
+  position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:50%;
+  border:0; background:rgba(244,63,94,0.18); color:var(--bad); font-size:11px; font-weight:900;
+  display:grid; place-items:center; cursor:pointer; opacity:0.4; transition:all .2s; z-index:2;
+}
+.food:hover .del-item-btn{opacity:1;}
+.del-item-btn:hover{background:var(--bad); color:#fff; transform:scale(1.2);}
+.food.add-btn{border:2px dashed var(--brand); background:transparent; color:var(--brand);}
+
+@keyframes pop{from{opacity:0; transform:translateY(8px) scale(.92);}to{opacity:1; transform:none;}}
+.shake{animation:shake .4s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+.hint{color:var(--bad); font-weight:800; margin:12px 0 0;}
+
+.stepper{display:flex; align-items:center; justify-content:center; gap:20px;}
+.stepper button{
+  width:56px; height:56px; border-radius:18px; border:0; color:#fff; font-size:1.9rem; line-height:1; cursor:pointer;
+  background:linear-gradient(135deg,var(--brand),var(--brand2)); box-shadow:0 10px 20px var(--brand-soft);
+}
+.daysbox{min-width:150px; text-align:center;}
+.daysbox .big{font-size:3.2rem; font-weight:900; line-height:1.05; color:var(--brand);}
+.daysbox .lbl{color:var(--muted); font-size:.95rem; font-weight:700;}
+.chips{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:18px;}
+.chip{
+  border:1.5px solid var(--line); background:var(--solid); color:var(--ink); font:inherit; font-size:.88rem; font-weight:700;
+  padding:8px 15px; border-radius:999px; cursor:pointer;
+}
+.chip[aria-pressed="true"]{border-color:var(--brand); background:var(--brand-soft); color:var(--brand);}
+
+.cta{
+  width:100%; border:0; border-radius:20px; padding:18px; font:inherit; font-size:1.15rem; font-weight:900; color:#fff; cursor:pointer;
+  background:linear-gradient(135deg,var(--brand),var(--brand2)); box-shadow:0 14px 30px var(--brand-soft);
+  transition:transform .2s;
+}
+.cta:hover{transform:translateY(-2px);}
+.ghost{
+  border:1.5px solid var(--line); background:var(--solid); color:var(--ink); font:inherit; font-weight:800; font-size:.92rem;
+  padding:12px 14px; border-radius:14px; cursor:pointer; text-align:center;
+}
+.ghost:hover{border-color:var(--brand);}
+
+.dz{
+  border:2px dashed var(--brand); border-radius:22px; padding:32px 18px; text-align:center; cursor:pointer;
+  background:var(--brand-soft);
+}
+.dz .ic{font-size:2.8rem;}
+.dz .t{font-weight:900; margin-top:8px;}
+.dz .s{color:var(--muted); font-size:.9rem;}
+.btnrow{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;}
+.vh{position:absolute; width:1px; height:1px; opacity:0; overflow:hidden;}
+.pv{position:relative; margin-top:14px; border-radius:20px; overflow:hidden; border:1px solid var(--line); background:var(--solid);}
+.pv img{display:block; width:100%; max-height:340px; object-fit:contain;}
+.pv-del{
+  position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.7); color:#fff; border:0;
+  border-radius:50%; width:38px; height:38px; font-size:1.15rem; cursor:pointer; display:grid; place-items:center;
+}
+.filechip{
+  display:inline-flex; gap:6px; align-items:center; margin-top:12px; font-size:.82rem; font-weight:700; color:var(--muted);
+  background:var(--solid); border:1px solid var(--line); border-radius:999px; padding:6px 14px;
+}
+.cam-container{margin-top:14px; border-radius:20px; overflow:hidden; border:2px solid var(--brand); background:#000; position:relative;}
+.cam-container video{display:block; width:100%; max-height:340px; object-fit:cover;}
+.cam-actions{position:absolute; bottom:14px; left:0; right:0; display:flex; gap:12px; justify-content:center;}
+.cam-actions .cta{width:auto; padding:11px 24px;}
+.cam-actions .ghost{background:rgba(255,255,255,0.9); color:#062d22;}
+
+.loader{text-align:center; padding:52px 20px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);}
+.spin{width:48px; height:48px; margin:0 auto 16px; border-radius:50%; border:4px solid var(--brand-soft); border-top-color:var(--brand); animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.result{
+  position:relative; overflow:hidden; border-radius:var(--radius); border:1px solid var(--line);
+  background:var(--surface); box-shadow:var(--shadow); backdrop-filter:blur(22px); margin-bottom:18px;
+}
+.result.fresh{--tone:var(--good); --tone-soft:var(--good-soft);}
+.result.soon{--tone:var(--warn); --tone-soft:var(--warn-soft);}
+.result.bad{--tone:var(--bad); --tone-soft:var(--bad-soft);}
+.rin{position:relative; padding:22px;}
+.resphoto{display:block; width:calc(100% + 44px); height:190px; object-fit:cover; margin:-22px -22px 18px;}
+.chipline{display:inline-flex; align-items:center; gap:6px; font-size:.84rem; font-weight:800; background:var(--solid); border:1px solid var(--line); border-radius:999px; padding:6px 14px; margin-bottom:16px;}
+.hrow{display:flex; align-items:center; gap:20px;}
+.ring{position:relative; width:136px; height:136px; flex-shrink:0;}
+.ring svg{transform:rotate(-90deg); display:block;}
+.ring .trk{fill:none; stroke:var(--line); stroke-width:11;}
+.ring .fg{fill:none; stroke:var(--tone); stroke-width:11; stroke-linecap:round;}
+.ringtxt{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;}
+.ringtxt b{font-size:1.75rem; line-height:1; font-weight:900;}
+.ringtxt span{font-size:.7rem; color:var(--muted); font-weight:800; text-transform:uppercase; max-width:86px;}
+.verdict{font-size:1.85rem; font-weight:900; line-height:1.15; color:var(--tone);}
+.sentence{margin:6px 0 0; font-weight:700;}
+.daysline{margin:4px 0 0; color:var(--muted); font-size:.95rem;}
+.barbox{position:relative; margin:54px 4px 6px;}
+.bar{display:flex; height:15px; border-radius:12px; overflow:hidden;}
+.sg{flex:41.67; background:linear-gradient(90deg,#059669,#10b981);}
+.sy{flex:29.17; background:linear-gradient(90deg,#d97706,#f59e0b);}
+.sr{flex:29.17; background:linear-gradient(90deg,#e11d48,#f43f5e);}
+.marker{position:absolute; bottom:-7px; transform:translateX(-50%); text-align:center; transition:left .8s cubic-bezier(.2,.8,.2,1);}
+.marker span{display:block; font-size:1.8rem; line-height:1.2;}
+.marker::after{content:""; display:block; width:5px; height:28px; background:var(--ink); border-radius:3px; margin:0 auto;}
+.barlabels{display:flex; font-size:.75rem; font-weight:800; color:var(--muted); margin:4px 4px 0;}
+.barlabels span:nth-child(1){flex:41.67;} .barlabels span:nth-child(2){flex:29.17; text-align:center;} .barlabels span:nth-child(3){flex:29.17; text-align:right;}
+.why{background:var(--solid); border:1px solid var(--line); border-radius:16px; padding:12px 16px; margin:18px 0 14px; font-size:.95rem;}
+.tiph{font-weight:900; margin:0 0 10px;}
+.tips{display:grid; gap:8px;}
+.tip{display:flex; gap:12px; align-items:flex-start; background:var(--solid); border:1px solid var(--line); border-radius:16px; padding:12px 14px; font-size:.93rem;}
+.acts{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px;}
+
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px);
+  display:flex; align-items:center; justify-content:center; z-index:999; padding:16px;
+}
+.modal{
+  background:var(--solid); border:1px solid var(--line); border-radius:var(--radius);
+  padding:26px; width:100%; max-width:420px; box-shadow:0 24px 48px rgba(0,0,0,0.6);
+}
+.modal h3{margin:0 0 16px; font-weight:900;}
+.field{margin-bottom:14px; display:flex; flex-direction:column; gap:6px;}
+.field label{font-size:.85rem; font-weight:800; color:var(--muted);}
+.field input, .field select{padding:11px 14px; border-radius:12px; border:1px solid var(--line); font:inherit; background:var(--bg); color:var(--ink);}
+.m-acts{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:22px;}
+.avatar-preview{width:70px; height:70px; border-radius:50%; object-fit:cover; margin:0 auto 10px; display:block; border:2px solid var(--brand);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ TOP NAVBAR ============ -->
+  <nav class="navbar">
+    <div class="brand" onclick="navigateTo('home')">
+      <div class="logo">🥬</div>
+      <div><div class="bname">FreshCheck</div></div>
+    </div>
+
+    <div class="nav-links">
+      <button class="nav-item" id="navHome" onclick="navigateTo('home')" data-i18n="navHome">Home</button>
+      <button class="nav-item active" id="navCheck" onclick="navigateTo('check')" data-i18n="navCheck">Check Food</button>
+      <button class="nav-item" id="navAbout" onclick="navigateTo('about')" data-i18n="navAbout">About</button>
+      <button class="nav-item" id="navLogin" onclick="navigateTo('login')" data-i18n="navLogin">Login</button>
+    </div>
+
+    <div class="top-right-controls">
+      <div class="langseg">
+        <button id="langEn" aria-pressed="true" onclick="setLang('en')">EN</button>
+        <button id="langTa" aria-pressed="false" onclick="setLang('ta')">தமிழ்</button>
+      </div>
+
+      <button class="iconbtn" id="themeBtn" aria-label="Toggle theme" onclick="toggleTheme()">☀️</button>
+
+      <div class="profile-btn" onclick="toggleProfileMenu()">
+        <img id="navAvatar" class="profile-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Fresh" alt="Avatar">
+        <span class="profile-tag" id="navProfileName">User</span>
+      </div>
+
+      <div class="profile-menu" id="profileMenu" hidden>
+        <div class="profile-menu-header">
+          <img id="menuAvatar" class="profile-menu-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=Fresh" alt="Avatar">
+          <div>
+            <div class="profile-menu-name" id="menuName">Mari Anu</div>
+            <div class="profile-menu-house" id="menuHouse">🏡 Sweet Home</div>
+            <div class="profile-menu-email" id="menuEmail">user@freshcheck.app</div>
+          </div>
+        </div>
+        <div class="profile-menu-actions">
+          <button class="ghost" onclick="openProfileEdit()" data-i18n="editProfile">✏️ Edit Profile</button>
+          <button class="ghost" onclick="navigateTo('login')" data-i18n="account">🔐 Account / Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ==================== PAGE 1: HOME PAGE ==================== -->
+  <section class="page-view" id="pageHome">
+    <div class="home-hero">
+      <h1 data-i18n="homeTitle">Smart Food Expiry & Freshness Checker</h1>
+      <p class="sub" style="margin:0 auto;" data-i18n="homeSub">Keep your family healthy, eliminate food waste, and inspect freshness easily in seconds.</p>
+      <div style="margin-top:24px;">
+        <button class="cta" style="width:auto; padding:16px 36px;" onclick="navigateTo('check')" data-i18n="startChecking">🚀 Start Checking Food</button>
+      </div>
+    </div>
+
+    <div class="home-features">
+      <div class="feature-card">
+        <div class="fic">📅</div>
+        <h3 data-i18n="feat1Title">Shelf Life Estimation</h3>
+        <p data-i18n="feat1Desc">Accurate shelf-life predictions for dairy, meats, fruits, vegetables, and cooked leftovers.</p>
+      </div>
+      <div class="feature-card">
+        <div class="fic">📸</div>
+        <h3 data-i18n="feat2Title">Camera Optical Check</h3>
+        <p data-i18n="feat2Desc">Directly take a photo or upload from gallery to detect browning, discoloration, and spoilage spots.</p>
+      </div>
+      <div class="feature-card">
+        <div class="fic">🏡</div>
+        <h3 data-i18n="feat3Title">Personal Household Hub</h3>
+        <p data-i18n="feat3Desc">Personalize with your house name, custom dietary items, and multilingual voice reading.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== PAGE 2: CHECK FOOD ==================== -->
+  <section class="page-view active" id="pageCheck">
+    <section class="hero" style="text-align:center; margin-bottom:20px;">
+      <h1 id="title" style="margin:0 0 8px;">Is my food still good?</h1>
+      <p class="sub" style="margin:0; color:var(--muted);" data-i18n="subtitle">Pick your food, tell us when you bought it, and we will tell you if it is safe to eat.</p>
+    </section>
+
+    <div class="layout">
+      <!-- INPUT COLUMN -->
+      <div class="col-in">
+        <div class="seg" id="seg">
+          <span class="seg-ind"></span>
+          <button id="modeDays" aria-pressed="true" onclick="setMode('days')" data-i18n="modeDays">📅 By days</button>
+          <button id="modePhoto" aria-pressed="false" onclick="setMode('photo')" data-i18n="modePhoto">📷 By photo</button>
+        </div>
+
+        <!-- BY DAYS -->
+        <div id="panelDays">
+          <div class="card" id="foodCard">
+            <p class="stephead"><span class="num">1</span><span data-i18n="step1">What food do you have?</span></p>
+            <div class="filters" id="filters"></div>
+            <div class="grid" id="foodGrid"></div>
+            <p class="hint" id="pickHint" hidden data-i18n="pickFirst">Please pick a food first 👆</p>
+          </div>
+
+          <div class="card">
+            <p class="stephead"><span class="num">2</span><span data-i18n="step2">How many days ago did you buy it?</span></p>
+            <div class="stepper">
+              <button aria-label="Less days" onclick="changeDays(-1)">−</button>
+              <div class="daysbox"><div class="big" id="daysBig">0</div><div class="lbl" id="daysLbl">Today</div></div>
+              <button aria-label="More days" onclick="changeDays(1)">+</button>
+            </div>
+            <div class="chips" id="chips">
+              <button class="chip" data-days="0" aria-pressed="true" data-i18n="chipToday">Today</button>
+              <button class="chip" data-days="1" aria-pressed="false" data-i18n="chipYesterday">Yesterday</button>
+              <button class="chip" data-days="3" aria-pressed="false" data-i18n="chip3">3 days</button>
+              <button class="chip" data-days="7" aria-pressed="false" data-i18n="chipWeek">1 week</button>
+              <button class="chip" data-days="14" aria-pressed="false" data-i18n="chip2Weeks">2 weeks</button>
+            </div>
+          </div>
+
+          <button class="cta" onclick="runDays()" data-i18n="check">Check my food →</button>
+        </div>
+
+        <!-- BY PHOTO -->
+        <div id="panelPhoto" hidden>
+          <div class="card">
+            <p class="stephead"><span class="num">1</span><span data-i18n="photoStep">Add a photo of your food</span></p>
+
+            <div class="dz" id="dz" tabindex="0" role="button">
+              <div class="ic">📷</div>
+              <div class="t" data-i18n="dropTitle">Tap to add a photo</div>
+              <div class="s" data-i18n="dropSub">or drag & drop it here</div>
+            </div>
+
+            <!-- Cam viewfinder -->
+            <div class="cam-container" id="camView" hidden>
+              <video id="webcam" playsinline autoplay muted></video>
+              <div class="cam-actions">
+                <button type="button" class="cta" id="snapBtn" data-i18n="snapBtn">📸 Capture</button>
+                <button type="button" class="ghost" id="closeCamBtn" data-i18n="closeCamBtn">Cancel</button>
+              </div>
+            </div>
+
+            <div class="pv" id="pv" hidden>
+              <img id="preview" alt="">
+              <button type="button" class="pv-del" id="removePhotoBtn" title="Remove photo">🗑️</button>
+            </div>
+            
+            <div class="filechip" id="fileChip" hidden></div>
+            <p class="hint" id="photoErr" hidden></p>
+
+            <div class="btnrow" id="btnRow">
+              <button type="button" class="ghost" id="pickBtn" data-i18n="photoBtn">🖼️ From gallery</button>
+              <button type="button" class="ghost" id="camBtn" data-i18n="cameraBtn">📸 Open camera</button>
+            </div>
+            <input type="file" id="photoInput" accept="image/*" class="vh" tabindex="-1">
+            <canvas id="work" hidden></canvas>
+            <p class="small" style="font-size:0.85rem; color:var(--muted); margin-top:10px;" data-i18n="photoNote">This inspects colors and dark spots as an estimate.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULT COLUMN -->
+      <aside class="col-out" aria-live="polite">
+        <div class="empty" id="empty">
+          <div class="big">🥗</div>
+          <h3 data-i18n="emptyTitle">Your result shows here</h3>
+          <p data-i18n="emptyText">Pick a food and tap Check. It takes 2 seconds.</p>
+        </div>
+
+        <div class="loader" id="loader" hidden><div class="spin"></div><span data-i18n="loading">Checking your food…</span></div>
+
+        <div class="result" id="result" hidden>
+          <div class="rin">
+            <img class="resphoto" id="resPhoto" alt="" hidden>
+            <div class="chipline" id="chipline"></div>
+
+            <div class="hrow">
+              <div class="ring" id="ring">
+                <svg viewBox="0 0 136 136" width="136" height="136">
+                  <circle class="trk" cx="68" cy="68" r="54"></circle>
+                  <circle class="fg" id="ringFg" cx="68" cy="68" r="54"></circle>
+                </svg>
+                <div class="ringtxt"><b id="ringNum">0%</b><span id="ringLbl"></span></div>
+              </div>
+              <div class="vtxt">
+                <div class="verdict"><span class="face" id="face"></span> <span id="verdict"></span></div>
+                <p class="sentence" id="sentence"></p>
+                <p class="daysline" id="daysline"></p>
+              </div>
+            </div>
+
+            <div class="barbox">
+              <div class="bar"><div class="sg"></div><div class="sy"></div><div class="sr"></div></div>
+              <div class="marker" id="marker"><span id="markerEmoji">🍎</span></div>
+            </div>
+            <div class="barlabels"><span id="bl1">Good</span><span id="bl2">Use soon</span><span id="bl3">Bad</span></div>
+
+            <div class="why" id="why"></div>
+
+            <p class="tiph" data-i18n="todoTitle">What to do</p>
+            <div class="tips" id="tips"></div>
+
+            <div class="acts">
+              <button class="ghost" id="listenBtn" onclick="toggleSpeak()">🔊 Listen</button>
+              <button class="ghost" onclick="resetAll()" data-i18n="again">🔁 Check another</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ==================== PAGE 3: ABOUT PAGE ==================== -->
+  <section class="page-view" id="pageAbout">
+    <div class="about-box">
+      <h2>About FreshCheck</h2>
+      <p>FreshCheck helps individuals and families prevent domestic food waste while safeguarding against foodborne illness.</p>
+      <hr style="border:0; border-top:1px solid var(--line); margin:20px 0;">
+      <h3>💡 How It Works</h3>
+      <ul>
+        <li><strong>Shelf Life Matrix:</strong> Calculates safe consumption windows from day of grocery purchase.</li>
+        <li><strong>Visual Spoilage Engine:</strong> Analyzes pixel color saturation, dark spotting, and oxidation on uploaded food photos.</li>
+        <li><strong>Zero Waste Storage Tips:</strong> Offers freezing, boiling, and composting suggestions.</li>
+      </ul>
+      <p style="margin-top:20px; font-size:.9rem; color:var(--muted);">Always trust your smell and sensory checks before eating. When in doubt, throw it out!</p>
+    </div>
+  </section>
+
+  <!-- ==================== PAGE 4: LOGIN PAGE ==================== -->
+  <section class="page-view" id="pageLogin">
+    <div class="login-card">
+      <h2 style="margin-top:0;" data-i18n="loginHead">Account Access</h2>
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" value="user@freshcheck.app">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" value="••••••••">
+      </div>
+      <button class="cta" onclick="handleLogin()" style="margin-top:10px;" data-i18n="loginBtn">Login / Save Session</button>
+      <p style="text-align:center; font-size:.85rem; color:var(--muted); margin-top:14px;">Demo session active for current device.</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- ==================== MODAL: PROFILE EDIT ==================== -->
+<div class="modal-overlay" id="editProfileModal" hidden>
+  <div class="modal">
+    <h3 data-i18n="editModalTitle">Edit Profile Details</h3>
+    <img id="avatarPreview" class="avatar-preview" src="" alt="Profile">
+    
+    <div class="field">
+      <label data-i18n="lblProfilePic">Profile Picture (Upload)</label>
+      <input type="file" id="profilePicInput" accept="image/*">
+    </div>
+    <div class="field">
+      <label data-i18n="lblName">Your Name</label>
+      <input type="text" id="profNameInput" placeholder="Enter your name">
+    </div>
+    <div class="field">
+      <label data-i18n="lblHouse">House Name / Address</label>
+      <input type="text" id="profHouseInput" placeholder="e.g. Green Villa / Annai Illam">
+    </div>
+    <div class="field">
+      <label>Email Address</label>
+      <input type="email" id="profEmailInput" placeholder="yourname@gmail.com">
+    </div>
+
+    <div class="m-acts">
+      <button type="button" class="ghost" onclick="closeProfileEdit()" data-i18n="cancel">Cancel</button>
+      <button type="button" class="cta" onclick="saveProfileDetails()" style="padding:10px;" data-i18n="save">Save Profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: ADD CUSTOM FOOD ==================== -->
+<div class="modal-overlay" id="addFoodModal" hidden>
+  <div class="modal">
+    <h3 data-i18n="modalTitle">Add Custom Food</h3>
+    <div class="field">
+      <label data-i18n="mEmoji">Food Emoji (e.g. 🥑, 🥞)</label>
+      <input type="text" id="mfEmoji" maxlength="3" value="🍲">
+    </div>
+    <div class="field">
+      <label data-i18n="mNameEn">Food Name (English)</label>
+      <input type="text" id="mfNameEn" placeholder="e.g. Avocado" required>
+    </div>
+    <div class="field">
+      <label data-i18n="mNameTa">Food Name (Tamil - Optional)</label>
+      <input type="text" id="mfNameTa" placeholder="எ.கா. அவகேடோ">
+    </div>
+    <div class="field">
+      <label data-i18n="mCat">Category</label>
+      <select id="mfCat">
+        <option value="Fruit">Fruit</option>
+        <option value="Vegetable">Vegetable</option>
+        <option value="Dairy">Dairy</option>
+        <option value="Meat">Meat</option>
+        <option value="Bakery">Bakery</option>
+        <option value="Cooked Food">Cooked Food</option>
+      </select>
+    </div>
+    <div class="field">
+      <label data-i18n="mShelf">Shelf Life (Days)</label>
+      <input type="number" id="mfShelf" min="1" max="90" value="5" required>
+    </div>
+    <div class="m-acts">
+      <button type="button" class="ghost" onclick="closeAddFoodModal()" data-i18n="cancel">Cancel</button>
+      <button type="button" class="cta" onclick="saveNewFood()" style="padding:10px;" data-i18n="save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ================= Profile State & Handling ================= */
+let userProfile = {
+  name: "Mari Anu",
+  house: "🏡 Annai Illam",
+  email: "marianu@gmail.com",
+  avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Mari"
+};
+
+try {
+  const savedProf = localStorage.getItem('fc_user_profile');
+  if (savedProf) userProfile = JSON.parse(savedProf);
+} catch(e) {}
+
+function renderProfileUI(){
+  if ($('navAvatar')) $('navAvatar').src = userProfile.avatar;
+  if ($('navProfileName')) $('navProfileName').textContent = userProfile.name;
+  if ($('menuAvatar')) $('menuAvatar').src = userProfile.avatar;
+  if ($('menuName')) $('menuName').textContent = userProfile.name;
+  if ($('menuHouse')) $('menuHouse').textContent = userProfile.house;
+  if ($('menuEmail')) $('menuEmail').textContent = userProfile.email;
+}
+
+function toggleProfileMenu(){
+  const m = $('profileMenu');
+  m.hidden = !m.hidden;
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.profile-btn') && !e.target.closest('#profileMenu')) {
+    if ($('profileMenu')) $('profileMenu').hidden = true;
+  }
+});
+
+function openProfileEdit(){
+  $('profileMenu').hidden = true;
+  $('avatarPreview').src = userProfile.avatar;
+  $('profNameInput').value = userProfile.name;
+  $('profHouseInput').value = userProfile.house;
+  $('profEmailInput').value = userProfile.email;
+  $('editProfileModal').hidden = false;
+}
+
+function closeProfileEdit(){
+  $('editProfileModal').hidden = true;
+}
+
+$('profilePicInput').addEventListener('change', e => {
+  const file = e.target.files && e.target.files[0];
+  if (file){
+    const reader = new FileReader();
+    reader.onload = ev => { $('avatarPreview').src = ev.target.result; };
+    reader.readAsDataURL(file);
+  }
+});
+
+function saveProfileDetails(){
+  const n = $('profNameInput').value.trim() || userProfile.name;
+  const h = $('profHouseInput').value.trim() || userProfile.house;
+  const em = $('profEmailInput').value.trim() || userProfile.email;
+  const av = $('avatarPreview').src || userProfile.avatar;
+
+  userProfile = { name: n, house: h, email: em, avatar: av };
+  try { localStorage.setItem('fc_user_profile', JSON.stringify(userProfile)); } catch(e){}
+  renderProfileUI();
+  closeProfileEdit();
+}
+
+function handleLogin(){
+  userProfile.email = $('loginEmail').value.trim();
+  try { localStorage.setItem('fc_user_profile', JSON.stringify(userProfile)); } catch(e){}
+  renderProfileUI();
+  alert("Profile synchronized successfully!");
+  navigateTo('check');
+}
+
+/* ================= Tab Navigation ================= */
+function navigateTo(pageId){
+  ['home','check','about','login'].forEach(p => {
+    const el = $('page' + p.charAt(0).toUpperCase() + p.slice(1));
+    const nav = $('nav' + p.charAt(0).toUpperCase() + p.slice(1));
+    if (el) el.classList.toggle('active', p === pageId);
+    if (nav) nav.classList.toggle('active', p === pageId);
+  });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ================= Food Database ================= */
+const DEFAULT_FOODS = [
+  ["Apple","🍎","Apple","ஆப்பிள்","Fruit",25],
+  ["Banana","🍌","Banana","வாழைப்பழம்","Fruit",7],
+  ["Mango","🥭","Mango","மாம்பழம்","Fruit",8],
+  ["Grapes","🍇","Grapes","திராட்சை","Fruit",9],
+  ["Tomato","🍅","Tomato","தக்காளி","Vegetable",10],
+  ["Potato","🥔","Potato","உருளைக்கிழங்கு","Vegetable",30],
+  ["Onion","🧅","Onion","வெங்காயம்","Vegetable",35],
+  ["Carrot","🥕","Carrot","கேரட்","Vegetable",20],
+  ["Spinach","🥬","Spinach","பசலைக்கீரை","Vegetable",5],
+  ["Lettuce","🥗","Lettuce","லெட்டூஸ்","Vegetable",6],
+  ["Milk","🥛","Milk","பால்","Dairy",6],
+  ["Curd","🥣","Curd","தயிர்","Dairy",5],
+  ["Yogurt","🍦","Yogurt","யோகர்ட்","Dairy",7],
+  ["Paneer","🧈","Paneer","பன்னீர்","Dairy",4],
+  ["Cheese","🧀","Cheese","சீஸ்","Dairy",15],
+  ["Egg","🥚","Egg","முட்டை","Dairy",21],
+  ["Chicken","🍗","Chicken","கோழி இறைச்சி","Meat",3],
+  ["Fish","🐟","Fish","மீன்","Meat",2],
+  ["Bread","🍞","Bread","பிரட்","Bakery",5],
+  ["Rice (cooked)","🍚","Cooked rice","சமைத்த சாதம்","Cooked Food",2]
+];
+
+let FOOD_LIST = [];
+try {
+  const saved = localStorage.getItem('fc_active_foods_v2');
+  FOOD_LIST = saved ? JSON.parse(saved) : DEFAULT_FOODS.slice();
+} catch(e) {
+  FOOD_LIST = DEFAULT_FOODS.slice();
+}
+
+const FOODS = {};
+function rebuildFoodsIndex(){
+  Object.keys(FOODS).forEach(k => delete FOODS[k]);
+  FOOD_LIST.forEach(f => FOODS[f[0]] = {emoji:f[1], en:f[2], ta:f[3], cat:f[4], shelf:f[5]});
+  try { localStorage.setItem('fc_active_foods_v2', JSON.stringify(FOOD_LIST)); } catch(e){}
+}
+rebuildFoodsIndex();
+
+const GROUP = {Fruit:'Fruit', Vegetable:'Vegetable', Dairy:'Dairy', Meat:'Meat', Bakery:'Other', 'Cooked Food':'Other'};
+const FILTERS = [['all','fAll'],['Fruit','fFruit'],['Vegetable','fVeg'],['Dairy','fDairy'],['Meat','fMeat'],['Other','fOther']];
+
+const T = {
+  en: {
+    navHome:"Home", navCheck:"Check Food", navAbout:"About", navLogin:"Login",
+    homeTitle:"Smart Food Expiry & Freshness Checker",
+    homeSub:"Keep your family healthy, eliminate food waste, and inspect freshness easily in seconds.",
+    startChecking:"🚀 Start Checking Food",
+    feat1Title:"Shelf Life Estimation", feat1Desc:"Accurate shelf-life predictions for household food items.",
+    feat2Title:"Camera Spoilage Check", feat2Desc:"Inspect darkening spots, oxidation, and discoloration instantly.",
+    feat3Title:"Custom Household Hub", feat3Desc:"Personalize your profile, house name, and custom diet items.",
+    editProfile:"✏️ Edit Profile", account:"🔐 Account / Logout",
+    editModalTitle:"Edit Profile Details", lblProfilePic:"Profile Picture (Upload)",
+    lblName:"Your Name", lblHouse:"House Name / Address",
+    loginHead:"Account Access", loginBtn:"Login / Save Session",
+    title:"Is my food still good?", subtitle:"Pick your food, tell us when you bought it, and we will tell you if it is safe to eat.",
+    modeDays:"📅 By days", modePhoto:"📷 By photo",
+    step1:"What food do you have?", step2:"How many days ago did you buy it?",
+    fAll:"All", fFruit:"Fruits", fVeg:"Vegetables", fDairy:"Dairy & eggs", fMeat:"Meat & fish", fOther:"Others",
+    pickFirst:"Please pick a food first 👆",
+    chipToday:"Today", chipYesterday:"Yesterday", chip3:"3 days", chipWeek:"1 week", chip2Weeks:"2 weeks",
+    check:"Check my food  →",
+    photoStep:"Add a photo of your food", dropTitle:"Tap to add a photo", dropSub:"or drag & drop it here",
+    photoBtn:"🖼️ From gallery", cameraBtn:"📸 Open camera", snapBtn:"📸 Capture", closeCamBtn:"Cancel",
+    emptyTitle:"Your result shows here", emptyText:"Pick a food and tap Check. It takes 2 seconds.",
+    loading:"Checking your food…",
+    verdict:{fresh:"Fresh", soon:"Use it soon", bad:"Throw it away"},
+    sentence:{fresh:"Good to eat! This food is still fresh.", soon:"Use it soon, today or tomorrow.", bad:"Do not eat this. Throw it away."},
+    lifeLeft:"shelf life left", looksFresh:"looks fresh", photoBadge:"Photo check",
+    whyDays:"{food} usually stays good for about {shelf} days. You bought it {when}.",
+    whyPhoto:"Dark or brown spots cover about {pct}% of the photo.",
+    left:"About {n} day(s) left.", close:"It is very close to its limit.", zero:"Its normal time is over today.", past:"It is {n} day(s) past its normal time.",
+    todoTitle:"What to do", again:"🔁 Check another",
+    daysAgo:"{n} days ago", dayAgo:"1 day ago", today:"Today",
+    addBtn:"Add Food", modalTitle:"Add Custom Food", mEmoji:"Food Emoji", mNameEn:"Food Name (English)",
+    mNameTa:"Food Name (Tamil - optional)", mCat:"Category", mShelf:"Shelf life (Days)",
+    cancel:"Cancel", save:"Save",
+    keep:{
+      "Fruit":"Keep in a cool place. Most fruits last longer in the fridge.",
+      "Vegetable":"Keep dry and cool. Leafy greens stay fresher in the fridge.",
+      "Dairy":"Keep in the fridge with the lid closed tightly.",
+      "Meat":"Keep in the fridge or freezer. Cook within 1–2 days.",
+      "Bakery":"Keep in a closed bag or box.",
+      "Cooked Food":"Keep in a closed box in the fridge. Heat until steaming hot before eating."
+    },
+    soonTip:{
+      "Fruit":"Eat it today, or cut it and freeze it for smoothies.",
+      "Vegetable":"Cook it today. Curries and soups are a good use.",
+      "Dairy":"Use it today. If it smells bad, do not use it.",
+      "Meat":"Cook it today thoroughly.",
+      "Bakery":"Eat it today or toast it.",
+      "Cooked Food":"Eat it now, heated until steaming hot."
+    },
+    badTips:["Do not eat or taste it.","Put it in the bin or compost.","Wash the container thoroughly."]
+  },
+  ta: {
+    navHome:"முகப்பு", navCheck:"உணவை சரிபார்", navAbout:"விளக்கம்", navLogin:"உள்நுழை",
+    homeTitle:"உணவு வீணாவதைத் தடுக்கும் ஸ்மார்ட் உதவியாளர்",
+    homeSub:"குடும்ப ஆரோக்கியத்தைப் பாதுகாத்து உணவு வீணாவதைத் தவிர்க்க உடனடி பரிசோதனை.",
+    startChecking:"🚀 உணவை சரிபார்க்க தொடங்கு",
+    feat1Title:"நாட்கள் கணக்கீடு", feat1Desc:"பால், காய்கறி, அசைவ உணவுகளின் ஆயுட்காலம் உடனடி கணிப்பு.",
+    feat2Title:"கேமரா வழியான ஆய்வு", feat2Desc:"கருமை மற்றும் கெட்டுப்போன புள்ளிகளை படம்பிடித்து அறியலாம்.",
+    feat3Title:"வீட்டுப் பயன்பாட்டு பக்கம்", feat3Desc:"சுயவிவரம், வீட்டுப் பெயர் மற்றும் சொந்த உணவு வகைகளைச் சேர்க்கலாம்.",
+    editProfile:"✏️ விவரம் மாற்று", account:"🔐 கணக்கு / வெளியேறு",
+    editModalTitle:"சுயவிவரம் திருத்துதல்", lblProfilePic:"சுயவிவரப் படம்",
+    lblName:"உங்கள் பெயர்", lblHouse:"வீட்டின் பெயர் / முகவரி",
+    loginHead:"உள்நுழைவு", loginBtn:"சேமிக்கவும்",
+    title:"என் உணவு இன்னும் நல்லா இருக்கா?", subtitle:"உணவை தேர்ந்தெடுத்து, எப்போது வாங்கினீர்கள் என்று சொல்லுங்கள்.",
+    modeDays:"📅 நாட்களை வைத்து", modePhoto:"📷 போட்டோ வைத்து",
+    step1:"உங்களிடம் என்ன உணவு உள்ளது?", step2:"எத்தனை நாள் முன்பு வாங்கினீர்கள்?",
+    fAll:"எல்லாம்", fFruit:"பழங்கள்", fVeg:"காய்கறிகள்", fDairy:"பால் பொருட்கள்", fMeat:"இறைச்சி, மீன்", fOther:"மற்றவை",
+    pickFirst:"முதலில் ஒரு உணவைத் தேர்ந்தெடுங்கள் 👆",
+    chipToday:"இன்று", chipYesterday:"நேற்று", chip3:"3 நாள்", chipWeek:"1 வாரம்", chip2Weeks:"2 வாரம்",
+    check:"என் உணவை பாருங்கள் →",
+    photoStep:"உணவின் புகைப்படத்தைச் சேர்க்கவும்", dropTitle:"போட்டோ சேர்க்க தொடவும்", dropSub:"அல்லது இழுத்துப் போடவும்",
+    photoBtn:"🖼️ கேலரியில் இருந்து", cameraBtn:"📸 கேமரா திறக்க", snapBtn:"📸 படம் எடுங்கள்", closeCamBtn:"மூடு",
+    emptyTitle:"முடிவு இங்கே தோன்றும்", emptyText:"உணவை தேர்ந்தெடுத்து சோதிக்கவும்.",
+    loading:"சோதிக்கப்படுகிறது…",
+    verdict:{fresh:"புதுசு", soon:"சீக்கிரம் பயன்படுத்துங்கள்", bad:"தூக்கி எறியுங்கள்"},
+    sentence:{fresh:"சாப்பிடலாம்! உணவு புத்துணர்ச்சியாக உள்ளது.", soon:"சீக்கிரம் பயன்படுத்துங்கள்.", bad:"சாப்பிடாதீர்கள். தூக்கி எறியுங்கள்."},
+    lifeLeft:"மீதமுள்ள காலம்", looksFresh:"புதுசாக உள்ளது", photoBadge:"போட்டோ ஆய்வு",
+    whyDays:"{food} சுமார் {shelf} நாட்கள் கெடாது. வாங்கியது {when}.",
+    whyPhoto:"புகைப்படத்தில் சுமார் {pct}% இடங்களில் கருமை உள்ளது.",
+    left:"இன்னும் சுமார் {n} நாட்கள் உள்ளது.", close:"கெடுவதற்கு மிக அருகில் உள்ளது.", zero:"காலக்கெடு இன்றுடன் முடிகிறது.", past:"காலக்கெடுவை விட {n} நாள் கடந்துவிட்டது.",
+    todoTitle:"என்ன செய்ய வேண்டும்", again:"🔁 இன்னொன்று பார்க்க",
+    daysAgo:"{n} நாட்கள் முன்", dayAgo:"1 நாள் முன்", today:"இன்று",
+    addBtn:"உணவை சேர்", modalTitle:"புதிய உணவு சேர்க்க", mEmoji:"எமோஜி", mNameEn:"பெயர் (ஆங்கிலம்)",
+    mNameTa:"பெயர் (தமிழ்)", mCat:"வகை", mShelf:"நாட்கள்",
+    cancel:"ரத்து", save:"சேமி",
+    keep:{
+      "Fruit":"குளிர்ந்த இடத்தில் வைக்கவும்.",
+      "Vegetable":"ஈரப்பதமின்றி உலர்ந்த இடத்தில் வைக்கவும்.",
+      "Dairy":"மூடி போட்டு குளிர்சாதனப் பெட்டியில் வைக்கவும்.",
+      "Meat":"ஃப்ரிட்ஜில் வைத்து 1-2 நாளில் சமைக்கவும்.",
+      "Bakery":"மூடிய டப்பாவில் வைக்கவும்.",
+      "Cooked Food":"ஃப்ரிட்ஜில் வைத்து நன்கு சூடாக்கி உண்ணவும்."
+    },
+    soonTip:{
+      "Fruit":"இன்றே உண்ணுங்கள் அல்லது ஜூஸ் செய்யுங்கள்.",
+      "Vegetable":"இன்றே குழம்பு, பொரியல் செய்துவிடுங்கள்.",
+      "Dairy":"இன்றே பயன்படுத்தவும்.",
+      "Meat":"முழுமையாக வேகவைத்து இன்றே உண்ணவும்.",
+      "Bakery":"இன்றே உண்ணவும்.",
+      "Cooked Food":"ஆவி பறக்க சூடாக்கி உண்ணவும்."
+    },
+    badTips:["சாப்பிடாதீர்கள்.","குப்பையில் போடவும்.","பாத்திரத்தை நன்கு கழுவவும்."]
+  }
+};
+const FACE = {fresh:"😊", soon:"😐", bad:"🤢"};
+const TIP_ICONS = {fresh:['🧊','💡'], soon:['⏰','💡'], bad:['🚫','🗑️','🧼']};
+
+/* ================= Global State ================= */
+let lang = 'en';
+try { lang = localStorage.getItem('pf_lang') || 'en'; } catch(e) {}
+let theme = 'dark';
+try { theme = localStorage.getItem('pf_theme') || 'dark'; } catch(e) {}
+
+let mode = 'days', selFood = null, days = 0, filter = 'all';
+let last = null, loading = false;
+let photoUrl = null, photoName = '';
+let activeMediaStream = null;
+
+function tr(key, vars){
+  let s = T[lang][key];
+  if (typeof s !== 'string') return '';
+  if (vars) Object.keys(vars).forEach(k => { s = s.split('{'+k+'}').join(vars[k]); });
+  return s;
+}
+
+/* ================= Theme & Language ================= */
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', theme);
+  $('themeBtn').textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme(){
+  theme = theme === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('pf_theme', theme); } catch(e) {}
+  applyTheme();
+}
+
+function setLang(l){
+  lang = l;
+  try { localStorage.setItem('pf_lang', l); } catch(e) {}
+  applyLang();
+}
+function applyLang(){
+  document.documentElement.lang = lang;
+  $('title').textContent = T[lang].title;
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = tr(el.dataset.i18n); });
+  $('langEn').setAttribute('aria-pressed', lang === 'en');
+  $('langTa').setAttribute('aria-pressed', lang === 'ta');
+  buildFilters(); buildFoodGrid(); updateDays();
+  if (last) renderResult(false);
+}
+
+/* ================= Mode Selector ================= */
+function setMode(m){
+  mode = m;
+  stopCamera();
+  $('panelDays').hidden = (m !== 'days');
+  $('panelPhoto').hidden = (m !== 'photo');
+  $('modeDays').setAttribute('aria-pressed', m === 'days');
+  $('modePhoto').setAttribute('aria-pressed', m === 'photo');
+  $('seg').classList.toggle('photo', m === 'photo');
+  last = null; syncPanels();
+}
+function syncPanels(){
+  $('empty').hidden = !!(last || loading);
+  $('loader').hidden = !loading;
+  $('result').hidden = !last || loading;
+}
+
+/* ================= Food Filters & Grids ================= */
+function buildFilters(){
+  const box = $('filters');
+  box.innerHTML = '';
+  FILTERS.forEach(([key, label]) => {
+    const b = document.createElement('button');
+    b.className = 'fchip';
+    b.textContent = tr(label);
+    b.setAttribute('aria-pressed', filter === key);
+    b.onclick = () => { filter = key; buildFilters(); buildFoodGrid(); };
+    box.appendChild(b);
+  });
+}
+
+function deleteFood(foodKey, event){
+  event.stopPropagation();
+  if (!confirm((lang === 'ta' ? 'உணவை நீக்கவா?: ' : 'Delete this item?: ') + foodKey)) return;
+  FOOD_LIST = FOOD_LIST.filter(f => f[0] !== foodKey);
+  if (selFood === foodKey) selFood = null;
+  rebuildFoodsIndex();
+  buildFoodGrid();
+}
+
+function buildFoodGrid(){
+  const g = $('foodGrid');
+  g.innerHTML = '';
+  let i = 0;
+  FOOD_LIST.forEach(f => {
+    if (filter !== 'all' && GROUP[f[4]] !== filter) return;
+    const b = document.createElement('button');
+    b.className = 'food';
+    b.style.setProperty('--i', i++);
+    b.setAttribute('aria-pressed', selFood === f[0]);
+    b.innerHTML = `
+      <span class="del-item-btn" title="Delete" onclick="deleteFood('${f[0].replace(/'/g, "\\'")}', event)">✕</span>
+      <span class="e">${f[1]}</span>
+      <span class="n">${lang === 'ta' ? f[3] : f[2]}</span>
+    `;
+    b.onclick = () => { selFood = f[0]; $('pickHint').hidden = true; buildFoodGrid(); };
+    g.appendChild(b);
+  });
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'food add-btn';
+  addBtn.style.setProperty('--i', i);
+  addBtn.innerHTML = '<span class="e">➕</span><span class="n">' + tr('addBtn') + '</span>';
+  addBtn.onclick = () => { $('addFoodModal').hidden = false; $('mfNameEn').focus(); };
+  g.appendChild(addBtn);
+}
+
+function closeAddFoodModal(){ $('addFoodModal').hidden = true; }
+function saveNewFood(){
+  const nameEn = $('mfNameEn').value.trim();
+  if (!nameEn) return;
+  const emoji = $('mfEmoji').value.trim() || '🍲';
+  const nameTa = $('mfNameTa').value.trim() || nameEn;
+  const cat = $('mfCat').value;
+  const shelf = parseInt($('mfShelf').value, 10) || 5;
+
+  const newEntry = [nameEn, emoji, nameEn, nameTa, cat, shelf];
+  FOOD_LIST.push(newEntry);
+  rebuildFoodsIndex();
+  selFood = nameEn;
+  closeAddFoodModal();
+  buildFoodGrid();
+}
+
+/* ================= Days Control ================= */
+function daysLabel(n){
+  if (n === 0) return T[lang].today;
+  if (n === 1) return T[lang].dayAgo;
+  return tr('daysAgo', {n:n});
+}
+function updateDays(){
+  $('daysBig').textContent = days;
+  $('daysLbl').textContent = daysLabel(days);
+  document.querySelectorAll('#chips .chip').forEach(c => c.setAttribute('aria-pressed', parseInt(c.dataset.days, 10) === days));
+}
+function changeDays(d){ days = Math.max(0, Math.min(60, days + d)); updateDays(); }
+document.querySelectorAll('#chips .chip').forEach(c => { c.onclick = () => { days = parseInt(c.dataset.days, 10); updateDays(); }; });
+
+function verdictFor(ratio){ return ratio < 0.5 ? 'fresh' : (ratio < 0.85 ? 'soon' : 'bad'); }
+function startCheck(fn){
+  loading = true; last = null; syncPanels();
+  setTimeout(() => { loading = false; fn(); }, 400);
+}
+function runDays(){
+  if (!selFood || !FOODS[selFood]){
+    $('pickHint').hidden = false;
+    const c = $('foodCard');
+    c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
+    return;
+  }
+  const ratio = days / FOODS[selFood].shelf;
+  startCheck(() => {
+    last = {source:'days', food:selFood, days:days, ratio:ratio, verdict:verdictFor(ratio)};
+    renderResult(true);
+  });
+}
+
+/* ================= Camera & Photo Handling ================= */
+function stopCamera(){
+  if (activeMediaStream){
+    activeMediaStream.getTracks().forEach(track => track.stop());
+    activeMediaStream = null;
+  }
+  if ($('camView'))$('camView').hidden = true;
+}
+
+$('camBtn').onclick = async () => {
+  if ($('photoErr'))$('photoErr').hidden = true;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if ($('photoErr')) { $('photoErr').hidden = false; $('photoErr').textContent = "Camera not supported on this browser/environment."; }
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } }, audio: false
+    });
+    activeMediaStream = stream;
+    const v = $('webcam');
+    v.srcObject = stream;
+    v.play();
+    $('dz').hidden = true; $('pv').hidden = true; $('camView').hidden = false;
+  } catch (err) { 
+    if ($('photoErr')) { $('photoErr').hidden = false; $('photoErr').textContent = err.message; }
+  }
+};
+
+$('snapBtn').onclick = () => {
+  const video = $('webcam');
+  const snap = document.createElement('canvas');
+  snap.width = video.videoWidth || 640; snap.height = video.videoHeight || 480;
+  snap.getContext('2d').drawImage(video, 0, 0, snap.width, snap.height);
+  stopCamera();
+  snap.toBlob(blob => {
+    if (blob) handlePhotoFile(new File([blob], "camera.jpg", { type: "image/jpeg" }));
+  }, 'image/jpeg', 0.9);
+};
+$('closeCamBtn').onclick = () => { stopCamera(); if (!photoUrl) $('dz').hidden = false; else$('pv').hidden = false; };
+
+$('removePhotoBtn').onclick = () => {
+  photoUrl = null; photoName = '';
+  $('preview').src = '';$('pv').hidden = true; $('fileChip').hidden = true; $('dz').hidden = false;
+  last = null; syncPanels();
+};
+
+$('photoInput').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if (f) handlePhotoFile(f);
+});
+$('pickBtn').onclick = () => { stopCamera();$('photoInput').click(); };
+$('dz').onclick = () => { stopCamera();$('photoInput').click(); };
+
+async function handlePhotoFile(file){
+  if (!file) return;
+  photoName = file.name || 'photo';
+  $('fileChip').textContent = '📄 ' + photoName; $('fileChip').hidden = false;
+  photoUrl = URL.createObjectURL(file);
+  $('preview').src = photoUrl; $('pv').hidden = false; $('dz').hidden = true;
+
+  const img = new Image();
+  img.onload = () => analyzePhoto(img);
+  img.src = photoUrl;
+}
+
+function analyzePhoto(src){
+  const canvas = $('work');
+  canvas.width = 120; canvas.height = 120;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(src, 0, 0, 120, 120);
+  const data = ctx.getImageData(0, 0, 120, 120).data;
+
+  let n = 0, dark = 0, brown = 0;
+  for (let i = 0; i < data.length; i += 4){
+    const r = data[i], g = data[i+1], b = data[i+2];
+    const bright = (r + g + b) / 3;
+    if (bright < 60) dark++;
+    if (r > 60 && r < 140 && g > 30 && g < 100 && b < 70 && r > g) brown++;
+    n++;
+  }
+  const score = Math.min(1, (dark/n)*0.5 + (brown/n)*0.5);
+  const verdict = score < 0.18 ? 'fresh' : (score < 0.35 ? 'soon' : 'bad');
+  const ratio = score / 0.35;
+  const pct = Math.min(100, Math.round((dark + brown) / n * 100));
+
+  startCheck(() => {
+    last = {source:'photo', food:null, ratio:ratio, verdict:verdict, pct:pct, photo:photoUrl, name:photoName};
+    renderResult(true);
+  });
+}
+
+/* ================= Render Results ================= */
+const RING_C = 2 * Math.PI * 54;
+function renderResult(animate){
+  if (!last) return;
+  const v = last.verdict;
+  $('result').className = 'result ' + v;
+  syncPanels();
+
+  $('resPhoto').hidden = !(last.source === 'photo' && last.photo);
+  if (last.source === 'photo') $('resPhoto').src = last.photo;
+
+  $('face').textContent = FACE[v];
+  $('verdict').textContent = T[lang].verdict[v];$('sentence').textContent = T[lang].sentence[v];
+
+  let daysLine = '', why = '', emoji = '📍', tips = [];
+  if (last.source === 'days'){
+    const info = FOODS[last.food];
+    emoji = info ? info.emoji : '🍲';
+    const name = info ? (lang === 'ta' ? info.ta : info.en) : last.food;
+    const shelf = info ? info.shelf : 5;
+    const left = Math.round(shelf - last.days);
+    daysLine = left > 0 ? tr('left', {n:left}) : tr('past', {n:Math.abs(left)});
+    why = tr('whyDays', {food:name, shelf:shelf, when:daysLabel(last.days)});
+    $('chipline').textContent = emoji + ' ' + name + ' · ' + daysLabel(last.days);
+    tips = v === 'fresh' ? [T[lang].keep[info.cat]] : (v === 'soon' ? [T[lang].soonTip[info.cat]] : T[lang].badTips);
+  } else {
+    why = tr('whyPhoto', {pct:last.pct});
+    $('chipline').textContent = '📷 ' + tr('photoBadge');
+    tips = v === 'bad' ? T[lang].badTips : [T[lang].sentence[v]];
+  }
+  $('daysline').textContent = daysLine;
+  $('why').textContent = why;
+  $('tips').innerHTML = '';
+  tips.forEach((t, i) => {
+    const d = document.createElement('div'); d.className = 'tip';
+    d.innerHTML = `<i>${TIP_ICONS[v][i % TIP_ICONS[v].length]}</i><span>${t}</span>`;
+    $('tips').appendChild(d);
+  });
+
+  const pct = Math.round(Math.max(0, Math.min(1, 1 - last.ratio)) * 100);
+  $('ringLbl').textContent = last.source === 'photo' ? tr('looksFresh') : tr('lifeLeft');
+  $('ringFg').style.strokeDasharray = RING_C;
+  $('ringFg').style.strokeDashoffset = RING_C * (1 - pct / 100);
+  $('ringNum').textContent = pct + '\%';$('marker').style.left = Math.max(5, Math.min(95, (Math.min(last.ratio, 1.2) / 1.2) * 100)) + '%';
+}
+
+function resetAll(){ last = null; syncPanels(); }
+
+function toggleSpeak(){
+  if (!('speechSynthesis' in window) || !last) return;
+  const text = $('verdict').textContent + '. ' +$('sentence').textContent;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang === 'ta' ? 'ta-IN' : 'en-IN';
+  window.speechSynthesis.speak(u);
+}
+
+/* ================= Initialize ================= */
+applyTheme();
+applyLang();
+renderProfileUI();
+syncPanels();
+</script>
+</body>
+</html>
